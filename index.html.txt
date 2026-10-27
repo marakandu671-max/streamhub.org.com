@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub - Watch & Stream Videos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-red-600 text-white p-2 rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center">
+                <i class="fa-solid fa-play text-lg"></i>
+            </div>
+            <span class="text-xl font-black tracking-wider bg-gradient-to-r from-red-500 to-rose-400 bg-clip-text text-transparent">StreamHub</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button onclick="openCustomVideoModal()" class="bg-slate-800 hover:bg-slate-700 text-sm px-4 py-2 rounded-lg font-medium transition flex items-center space-x-2 border border-slate-700">
+                <i class="fa-solid fa-link text-red-400"></i>
+                <span>Load URL</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+        
+        <!-- Search & Filter Bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <!-- Categories -->
+            <div class="flex items-center space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0" id="category-filters">
+                <button onclick="filterCategory('All')" class="category-btn bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap">All</button>
+                <button onclick="filterCategory('Trailers')" class="category-btn bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap border border-slate-800">Trailers</button>
+                <button onclick="filterCategory('Nature')" class="category-btn bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap border border-slate-800">Nature</button>
+                <button onclick="filterCategory('Music')" class="category-btn bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap border border-slate-800">Music</button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="relative w-full md:w-72">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="search-input" oninput="searchVideos(this.value)" placeholder="Search videos..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-red-500 transition">
+            </div>
+        </div>
+
+        <!-- Video Grid -->
+        <h2 class="text-lg font-bold mb-4 flex items-center space-x-2">
+            <i class="fa-solid fa-fire text-red-500"></i>
+            <span>Featured Streams</span>
+        </h2>
+        <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Video Cards injected via JS -->
+        </div>
+    </main>
+
+    <!-- Video Modal Player -->
+    <div id="video-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-4xl bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+                <h3 id="modal-title" class="font-bold text-lg truncate">Playing Video</h3>
+                <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white transition p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="relative aspect-video w-full bg-black">
+                <iframe id="modal-iframe" class="w-full h-full" src="" title="Video Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Custom URL Modal -->
+    <div id="custom-url-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <h3 class="font-bold text-lg mb-2">Load YouTube Video</h3>
+            <p class="text-sm text-slate-400 mb-4">Paste any YouTube video link or ID below to watch instantly.</p>
+            <input type="text" id="custom-url-input" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 mb-4">
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeCustomVideoModal()" class="px-4 py-2 rounded-xl text-sm bg-slate-800 hover:bg-slate-700 transition">Cancel</button>
+                <button onclick="playCustomUrl()" class="px-4 py-2 rounded-xl text-sm bg-red-600 hover:bg-red-500 font-semibold transition text-white">Stream Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <p>&copy; 2026 StreamHub.media. Powered by HTML & GitHub Pages.</p>
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        const sampleVideos = [
+            { id: 'jfKfPfyJRdk', title: 'Lofi Girl - lofi hip hop radio 📚 - beats to relax/study to', category: 'Music', duration: 'LIVE' },
+            { id: 'aqz-KE-bpKQ', title: 'Big Buck Bunny (Blender Foundation Open Movie)', category: 'Trailers', duration: '9:56' },
+            { id: 'LXb3EKWsInQ', title: 'Costa Rica In 4K 60fps (Ultra HD)', category: 'Nature', duration: '5:59' },
+            { id: '5qap5aO4i9A', title: 'Synthwave Radio - Chill synth / retro beats', category: 'Music', duration: 'LIVE' },
+            { id: '1LA4QzGeaaQ', title: 'Sintel - Official Blender Open Movie', category: 'Trailers', duration: '14:48' }
+        ];
+
+        let currentCategory = 'All';
+
+        function renderVideos(videosToRender) {
+            const grid = document.getElementById('video-grid');
+            if (videosToRender.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">No videos found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = videosToRender.map(video => `
+                <div onclick="openVideoModal('${video.id}', '${video.title.replace(/'/g, "\\'")}')" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden group cursor-pointer hover:border-slate-700 transition duration-300 flex flex-col">
+                    <div class="relative aspect-video bg-slate-950 overflow-hidden">
+                        <img src="https://img.youtube.com/vi/${video.id}/hqdefault.jpg" alt="${video.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-play ml-0.5"></i>
+                            </div>
+                        </div>
+                        <span class="absolute bottom-2 right-2 bg-black/80 text-xs px-2 py-1 rounded font-medium">${video.duration}</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <h3 class="font-semibold text-sm line-clamp-2 group-hover:text-red-400 transition">${video.title}</h3>
+                        <span class="text-xs text-slate-500 mt-2">${video.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.innerText === category) {
+                    btn.className = 'category-btn bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap';
+                } else {
+                    btn.className = 'category-btn bg-slate-900 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap border border-slate-800';
+                }
+            });
+
+            if (category === 'All') {
+                renderVideos(sampleVideos);
+            } else {
+                renderVideos(sampleVideos.filter(v => v.category === category));
+            }
+        }
+
+        function searchVideos(query) {
+            const filtered = sampleVideos.filter(v => 
+                (currentCategory === 'All' || v.category === currentCategory) &&
+                v.title.toLowerCase().includes(query.toLowerCase())
+            );
+            renderVideos(filtered);
+        }
+
+        function openVideoModal(id, title) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('modal-iframe').src = '';
+            document.getElementById('video-modal').classList.add('hidden');
+        }
+
+        function openCustomVideoModal() {
+            document.getElementById('custom-url-modal').classList.remove('hidden');
+        }
+
+        function closeCustomVideoModal() {
+            document.getElementById('custom-url-modal').classList.add('hidden');
+        }
+
+        function extractVideoId(urlOrId) {
+            if (!urlOrId) return '';
+            if (urlOrId.length === 11) return urlOrId;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = urlOrId.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function playCustomUrl() {
+            const input = document.getElementById('custom-url-input').value.trim();
+            const id = extractVideoId(input);
+            if (id) {
+                closeCustomVideoModal();
+                openVideoModal(id, 'Custom Stream');
+                document.getElementById('custom-url-input').value = '';
+            } else {
+                alert('Please enter a valid YouTube link or ID.');
+            }
+        }
+
+        // Initial Load
+        renderVideos(sampleVideos);
+    </script>
+</body>
+</html>
